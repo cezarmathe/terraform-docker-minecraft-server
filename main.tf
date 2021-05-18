@@ -17,6 +17,15 @@ resource "docker_volume" "this" {
   name        = local.volume_name
   driver      = var.volume_driver
   driver_opts = var.volume_driver_opts
+
+  dynamic "labels" {
+    for_each = var.labels
+    iterator = label
+    content {
+      label = label.key
+      value = label.value
+    }
+  }
 }
 
 
@@ -66,6 +75,15 @@ resource "docker_container" "minecraft" {
     content {
       volume_name    = volume.value.name
       container_path = "/data"
+    }
+  }
+
+  dynamic "labels" {
+    for_each = var.labels
+    iterator = label
+    content {
+      label = label.key
+      value = label.value
     }
   }
 
