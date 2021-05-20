@@ -28,19 +28,18 @@ resource "docker_volume" "this" {
   }
 }
 
-
-resource "docker_container" "minecraft" {
+resource "docker_container" "this" {
   name  = local.container_name
-  image = docker_image.minecraft.latest
+  image = docker_image.this.latest
 
   env = [for k, v in local.env : format("%s=%s", k, v) if v != ""]
 
-  # fixme 17/05/2021: container resource limits
-  cpu_set     = var.cpu_set
+  cpu_set     = var.container_cpu_set
+  cpu_shares  = var.container_cpu_shares
   memory      = var.container_memory
-  memory_swap = var.container_memory * 2
+  memory_swap = var.container_memory_swap
 
-  # fixme 17/05/2021: container healthcheck tuning
+  # fixme 17/05/2021: container healthcheck tuning options
   healthcheck {
     interval     = "0s"
     retries      = 0
@@ -106,48 +105,51 @@ locals {
   )
 
   autopause = {
-    enable = var.autopause.enable ? (
+    enable = var.autopause_enable ? (
       upper(format("%s", true))
     ) : ""
-    timeout_est = var.autopause.enable ? (
-      format("%s", var.autopause.timeout_est)
+    timeout_est = var.autopause_enable ? (
+      format("%s", var.autopause_timeout_est)
     ) : ""
-    timeout_init = var.autopause.enable ? (
-      format("%s", var.autopause.timeout_init)
+    timeout_init = var.autopause_enable ? (
+      format("%s", var.autopause_timeout_init)
     ) : ""
-    timeout_kn = var.autopause.enable ? (
-      format("%s", var.autopause.timeout_kn)
+    timeout_kn = var.autopause_enable ? (
+      format("%s", var.autopause_timeout_kn)
     ) : ""
-    timeout_period = var.autopause.enable ? (
-      format("%s", var.autopause.timeout_period)
+    timeout_period = var.autopause_enable ? (
+      format("%s", var.autopause_timeout_period)
     ) : ""
-    knock_interface = var.autopause.enable ? var.autopause.knock_interface : ""
+    knock_interface = var.autopause_enable ? var.autopause_knock_interface : ""
   }
 
+  uid = var.uid != 1000 ? format("%s", var.uid) : ""
+  gid = var.gid != 1000 ? format("%s", var.gid) : ""
   enable_rolling_logs = var.enable_rolling_logs ? upper(format("%s", true)) : ""
   use_aikar_flags     = var.use_aikar_flags ? format("%s", true) : ""
   use_large_pages     = var.use_large_pages ? format("%s", true) : ""
+  stop_duration       = var.stop_duration != 60 ? format("%s", var.stop_duration) : ""
 
   env = {
-    MEMORY                    = var.memory.default
-    INIT_MEMORY               = var.memory.init
-    MAX_MEMORY                = var.memory.max
+    MEMORY                    = var.memory_default
+    INIT_MEMORY               = var.memory_init
+    MAX_MEMORY                = var.memory_max
     EULA                      = upper(format("%s", true))
-    VERSION                   = var.version
+    VERSION                   = var.minecraft_version
     TZ                        = var.timezone
     ENABLE_AUTOPAUSE          = local.autopause.enable
     AUTOPAUSE_TIMEOUT_EST     = local.autopause.timeout_est
     AUTOPAUSE_TIMEOUT_INIT    = local.autopause.timeout_init
     AUTOPAUSE_TIMEOUT_KN      = local.autopause.timeout_kn
-    AUTOPAUSE_PERIOD          = local.autopause.period
+    AUTOPAUSE_PERIOD          = local.autopause.timeout_period
     AUTOPAUSE_KNOCK_INTERFACE = local.autopause.knock_interface
-    UID                       = var.uid
-    GID                       = var.gid
+    UID                       = local.uid
+    GID                       = local.gid
     ENABLE_ROLLING_LOGS       = local.enable_rolling_logs
-    USE_AIKAR_FLAGS           = true
-    USE_LARGE_PAGES           = true
+    USE_AIKAR_FLAGS           = local.use_aikar_flags
+    USE_LARGE_PAGES           = local.use_large_pages
     PROXY                     = var.proxy
     GUI                       = upper(format("%s", false))
-    STOP_DURATION             = var.stop_duration
+    STOP_DURATION             = local.stop_duration
   }
 }
