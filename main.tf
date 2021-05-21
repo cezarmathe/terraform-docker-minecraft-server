@@ -101,7 +101,7 @@ locals {
   )
 
   server_properties = var.server_properties != "" ? var.server_properties : (
-    file("server.properties")
+    file("${path.module}/server.properties")
   )
 
   autopause = {
