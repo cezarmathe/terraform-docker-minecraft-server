@@ -37,26 +37,28 @@ variable "volume_driver_opts" {
 
 variable "container_cpu_set" {
   type        = string
-  description = "Cpu set to allow the container to use."
-  default     = "0"
+  description = "Cpu set to allow the container to use. (empty string disables the setting)"
+  default     = ""
 }
 
 variable "container_cpu_shares" {
   type        = number
-  description = "Cpu shares to allow the container to use."
-  default     = null
+  description = "Cpu shares to allow the container to use (<= 0 disables the setting)."
+  default     = -1
 }
 
 variable "container_memory" {
   type        = number
-  description = "Amount of memory to allow the container to use."
-  default     = 2048
+  description = "Amount of memory to allow the container to use (<= 0 disables the setting)."
+  default     = -1
 }
 
 variable "container_memory_swap" {
   type        = number
-  description = "Total amount of memory (ram + swap) to allow the container to use."
-  default     = 2048
+  description = <<-DESCRIPTION
+  Total amount of memory (ram + swap) to allow the container to use (<= 0 disables the setting).
+  DESCRIPTION
+  default     = -1
 }
 
 variable "internal_server_port" {

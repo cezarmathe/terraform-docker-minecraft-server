@@ -34,10 +34,10 @@ resource "docker_container" "this" {
 
   env = [for k, v in local.env : format("%s=%s", k, v) if v != ""]
 
-  cpu_set     = var.container_cpu_set
-  cpu_shares  = var.container_cpu_shares
-  memory      = var.container_memory
-  memory_swap = var.container_memory_swap
+  cpu_set     = local.container_cpu_set
+  cpu_shares  = local.container_cpu_shares
+  memory      = local.container_memory
+  memory_swap = local.container_memory_swap
 
   # fixme 17/05/2021: container healthcheck tuning options
   healthcheck {
@@ -123,8 +123,8 @@ locals {
     knock_interface = var.autopause_enable ? var.autopause_knock_interface : ""
   }
 
-  uid = var.uid != 1000 ? format("%s", var.uid) : ""
-  gid = var.gid != 1000 ? format("%s", var.gid) : ""
+  uid                 = var.uid != 1000 ? format("%s", var.uid) : ""
+  gid                 = var.gid != 1000 ? format("%s", var.gid) : ""
   enable_rolling_logs = var.enable_rolling_logs ? upper(format("%s", true)) : ""
   use_aikar_flags     = var.use_aikar_flags ? format("%s", true) : ""
   use_large_pages     = var.use_large_pages ? format("%s", true) : ""
@@ -152,4 +152,9 @@ locals {
     GUI                       = upper(format("%s", false))
     STOP_DURATION             = local.stop_duration
   }
+
+  container_cpu_set     = var.container_cpu_set != "" ? var.container_cpu_set : null
+  container_cpu_shares  = var.container_cpu_shares > 0 ? var.container_cpu_shares : null
+  container_memory      = var.container_memory > 0 ? var.container_memory : null
+  container_memory_swap = var.container_memory > 0 ? var.container_memory : null
 }
